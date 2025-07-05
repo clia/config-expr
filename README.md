@@ -40,7 +40,7 @@ clia-config-expr = "0.1.0"
 ### 基本用法
 
 ```rust
-use config_expr::{evaluate_json, validate_json};
+use clia_config_expr::{evaluate_json, validate_json};
 use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
