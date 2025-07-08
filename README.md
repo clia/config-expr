@@ -13,13 +13,17 @@
 
 ## 支持的操作符
 
-| 操作符 | 说明 | 示例 |
-|--------|------|------|
-| `equals` | 完全等于 | `"platform" equals "RTD"` |
-| `contains` | 包含 | `"platform" contains "RTD"` |
-| `prefix` | 前缀匹配 | `"platform" prefix "Hi"` |
-| `suffix` | 后缀匹配 | `"platform" suffix "Pro"` |
-| `regex` | 正则匹配 | `"version" regex "^v\\d+\\.\\d+\\.\\d+$"` |
+| 操作符 | 说明 | 示例 | 备注 |
+|--------|------|------|------|
+| `equals` | 完全等于 | `"platform" equals "RTD"` | 字符串比较 |
+| `contains` | 包含 | `"platform" contains "RTD"` | 字符串比较 |
+| `prefix` | 前缀匹配 | `"platform" prefix "Hi"` | 字符串比较 |
+| `suffix` | 后缀匹配 | `"platform" suffix "Pro"` | 字符串比较 |
+| `regex` | 正则匹配 | `"version" regex "^v\\d+\\.\\d+\\.\\d+$"` | 字符串比较 |
+| `gt` | 大于 | `"score" gt "80"` | 数值比较 |
+| `lt` | 小于 | `"age" lt "18"` | 数值比较 |
+| `ge` | 大于等于 | `"level" ge "5"` | 数值比较 |
+| `le` | 小于等于 | `"temperature" le "25.5"` | 数值比较 |
 
 ## 支持的条件类型
 
@@ -64,6 +68,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "value": "Hi"
                 },
                 "then": "chip_hi"
+            },
+            {
+                "if": {
+                    "field": "score",
+                    "op": "ge",
+                    "value": "80"
+                },
+                "then": "high_score"
             }
         ],
         "fallback": "default_chip"
@@ -105,11 +117,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### 条件表达式
 
 #### 简单条件
+
+字符串比较：
 ```json
 {
     "field": "platform",
     "op": "equals",
     "value": "RTD"
+}
+```
+
+数值比较：
+```json
+{
+    "field": "score",
+    "op": "ge",
+    "value": "80"
 }
 ```
 

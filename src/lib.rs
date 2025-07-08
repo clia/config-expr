@@ -27,6 +27,14 @@ pub enum Operator {
     Prefix,
     Suffix,
     Regex,
+    #[serde(rename = "gt")]
+    GreaterThan,
+    #[serde(rename = "lt")]
+    LessThan,
+    #[serde(rename = "ge")]
+    GreaterThanOrEqual,
+    #[serde(rename = "le")]
+    LessThanOrEqual,
 }
 
 impl Operator {
@@ -39,6 +47,10 @@ impl Operator {
                 | Operator::Prefix
                 | Operator::Suffix
                 | Operator::Regex
+                | Operator::GreaterThan
+                | Operator::LessThan
+                | Operator::GreaterThanOrEqual
+                | Operator::LessThanOrEqual
         )
     }
 }
@@ -148,6 +160,21 @@ impl ConfigEvaluator {
                     Err(_) => false, // 正则表达式无效时返回false
                 }
             }
+            Operator::GreaterThan => self.compare_numbers(field_value, value, |a, b| a > b),
+            Operator::LessThan => self.compare_numbers(field_value, value, |a, b| a < b),
+            Operator::GreaterThanOrEqual => self.compare_numbers(field_value, value, |a, b| a >= b),
+            Operator::LessThanOrEqual => self.compare_numbers(field_value, value, |a, b| a <= b),
+        }
+    }
+
+    /// 比较两个字符串作为数字
+    fn compare_numbers<F>(&self, field_value: &str, target_value: &str, compare_fn: F) -> bool
+    where
+        F: Fn(f64, f64) -> bool,
+    {
+        match (field_value.parse::<f64>(), target_value.parse::<f64>()) {
+            (Ok(field_num), Ok(target_num)) => compare_fn(field_num, target_num),
+            _ => false, // 如果任一值无法解析为数字，返回false
         }
     }
 
@@ -522,12 +549,10 @@ mod tests {
 
         let result = validate_json(json);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Rules cannot be empty")
-        );
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Rules cannot be empty"));
     }
 
     #[test]
@@ -549,12 +574,10 @@ mod tests {
 
         let result = validate_json(json);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Field name cannot be empty")
-        );
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Field name cannot be empty"));
     }
 
     #[test]
@@ -596,12 +619,10 @@ mod tests {
 
         let result = validate_json(json);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("AND condition cannot be empty")
-        );
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("AND condition cannot be empty"));
     }
 
     #[test]
@@ -621,12 +642,10 @@ mod tests {
 
         let result = validate_json(json);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("OR condition cannot be empty")
-        );
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("OR condition cannot be empty"));
     }
 
     #[test]
@@ -661,6 +680,195 @@ mod tests {
 
         if let Some(RuleResult::String(s)) = result {
             assert_eq!(s, "chip_cn");
+        } else {
+            panic!("Expected string result");
+        }
+    }
+
+    #[test]
+    fn test_greater_than_condition() {
+        let json = r#"
+        {
+            "rules": [
+                {
+                    "if": {
+                        "field": "score",
+                        "op": "gt",
+                        "value": "80"
+                    },
+                    "then": "high_score"
+                }
+            ]
+        }
+        "#;
+
+        let mut params = HashMap::new();
+        params.insert("score".to_string(), "85".to_string());
+
+        let result = evaluate_json(json, &params).unwrap();
+        assert!(result.is_some());
+
+        if let Some(RuleResult::String(s)) = result {
+            assert_eq!(s, "high_score");
+        } else {
+            panic!("Expected string result");
+        }
+
+        // 测试不满足条件的情况
+        let mut params = HashMap::new();
+        params.insert("score".to_string(), "75".to_string());
+
+        let result = evaluate_json(json, &params).unwrap();
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_less_than_condition() {
+        let json = r#"
+        {
+            "rules": [
+                {
+                    "if": {
+                        "field": "age",
+                        "op": "lt",
+                        "value": "18"
+                    },
+                    "then": "minor"
+                }
+            ]
+        }
+        "#;
+
+        let mut params = HashMap::new();
+        params.insert("age".to_string(), "16".to_string());
+
+        let result = evaluate_json(json, &params).unwrap();
+        assert!(result.is_some());
+
+        if let Some(RuleResult::String(s)) = result {
+            assert_eq!(s, "minor");
+        } else {
+            panic!("Expected string result");
+        }
+    }
+
+    #[test]
+    fn test_greater_than_or_equal_condition() {
+        let json = r#"
+        {
+            "rules": [
+                {
+                    "if": {
+                        "field": "level",
+                        "op": "ge",
+                        "value": "5"
+                    },
+                    "then": "advanced"
+                }
+            ]
+        }
+        "#;
+
+        let mut params = HashMap::new();
+        params.insert("level".to_string(), "5".to_string());
+
+        let result = evaluate_json(json, &params).unwrap();
+        assert!(result.is_some());
+
+        if let Some(RuleResult::String(s)) = result {
+            assert_eq!(s, "advanced");
+        } else {
+            panic!("Expected string result");
+        }
+    }
+
+    #[test]
+    fn test_less_than_or_equal_condition() {
+        let json = r#"
+        {
+            "rules": [
+                {
+                    "if": {
+                        "field": "temperature",
+                        "op": "le",
+                        "value": "25.5"
+                    },
+                    "then": "cool"
+                }
+            ]
+        }
+        "#;
+
+        let mut params = HashMap::new();
+        params.insert("temperature".to_string(), "23.8".to_string());
+
+        let result = evaluate_json(json, &params).unwrap();
+        assert!(result.is_some());
+
+        if let Some(RuleResult::String(s)) = result {
+            assert_eq!(s, "cool");
+        } else {
+            panic!("Expected string result");
+        }
+    }
+
+    #[test]
+    fn test_numeric_comparison_with_invalid_numbers() {
+        let json = r#"
+        {
+            "rules": [
+                {
+                    "if": {
+                        "field": "value",
+                        "op": "gt",
+                        "value": "10"
+                    },
+                    "then": "valid"
+                }
+            ],
+            "fallback": "invalid"
+        }
+        "#;
+
+        // 测试无效数字
+        let mut params = HashMap::new();
+        params.insert("value".to_string(), "not_a_number".to_string());
+
+        let result = evaluate_json(json, &params).unwrap();
+        assert!(result.is_some());
+
+        if let Some(RuleResult::String(s)) = result {
+            assert_eq!(s, "invalid"); // 应该使用fallback
+        } else {
+            panic!("Expected string result");
+        }
+    }
+
+    #[test]
+    fn test_numeric_comparison_with_decimal_numbers() {
+        let json = r#"
+        {
+            "rules": [
+                {
+                    "if": {
+                        "field": "price",
+                        "op": "ge",
+                        "value": "99.99"
+                    },
+                    "then": "expensive"
+                }
+            ]
+        }
+        "#;
+
+        let mut params = HashMap::new();
+        params.insert("price".to_string(), "100.50".to_string());
+
+        let result = evaluate_json(json, &params).unwrap();
+        assert!(result.is_some());
+
+        if let Some(RuleResult::String(s)) = result {
+            assert_eq!(s, "expensive");
         } else {
             panic!("Expected string result");
         }

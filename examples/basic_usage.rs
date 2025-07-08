@@ -178,5 +178,94 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let result = evaluate_json(complex_rules, &params)?;
     println!("复杂条件匹配结果: {:?}", result);
 
+    // 示例6: 数值比较操作符
+    println!("\n=== 示例6: 数值比较操作符 ===");
+
+    let numeric_rules = r#"
+    {
+        "rules": [
+            {
+                "if": {
+                    "field": "score",
+                    "op": "ge",
+                    "value": "90"
+                },
+                "then": "excellent"
+            },
+            {
+                "if": {
+                    "field": "score",
+                    "op": "ge",
+                    "value": "80"
+                },
+                "then": "good"
+            },
+            {
+                "if": {
+                    "field": "score",
+                    "op": "ge",
+                    "value": "60"
+                },
+                "then": "pass"
+            }
+        ],
+        "fallback": "fail"
+    }
+    "#;
+
+    let test_scores = vec!["95", "85", "75", "50", "not_a_number"];
+
+    for score in test_scores {
+        let mut params = HashMap::new();
+        params.insert("score".to_string(), score.to_string());
+
+        let result = evaluate_json(numeric_rules, &params)?;
+        println!("分数 {} -> {:?}", score, result);
+    }
+
+    // 示例7: 混合条件（字符串和数值）
+    println!("\n=== 示例7: 混合条件 ===");
+
+    let mixed_rules = r#"
+    {
+        "rules": [
+            {
+                "if": {
+                    "and": [
+                        { "field": "category", "op": "equals", "value": "premium" },
+                        { "field": "price", "op": "gt", "value": "100.0" },
+                        { "field": "rating", "op": "ge", "value": "4.5" }
+                    ]
+                },
+                "then": {
+                    "tier": "premium",
+                    "discount": 0.1,
+                    "features": ["priority_support", "advanced_analytics"]
+                }
+            },
+            {
+                "if": {
+                    "and": [
+                        { "field": "category", "op": "equals", "value": "standard" },
+                        { "field": "price", "op": "le", "value": "50.0" }
+                    ]
+                },
+                "then": {
+                    "tier": "standard",
+                    "discount": 0.05
+                }
+            }
+        ]
+    }
+    "#;
+
+    let mut params = HashMap::new();
+    params.insert("category".to_string(), "premium".to_string());
+    params.insert("price".to_string(), "150.99".to_string());
+    params.insert("rating".to_string(), "4.8".to_string());
+
+    let result = evaluate_json(mixed_rules, &params)?;
+    println!("混合条件匹配结果: {:?}", result);
+
     Ok(())
 }
