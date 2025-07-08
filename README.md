@@ -38,7 +38,7 @@
 
 ```toml
 [dependencies]
-clia-config-expr = "0.1.0"
+clia-config-expr = "0.1.1"
 ```
 
 ### 基本用法
