@@ -181,9 +181,10 @@ impl ConfigEvaluator {
     /// 验证规则集是否合法
     fn validate_rules(rules: &ConfigRules) -> Result<(), ConfigExprError> {
         if rules.rules.is_empty() {
-            return Err(ConfigExprError::ValidationError(
-                "Rules cannot be empty".to_string(),
-            ));
+            return Ok(());
+            // return Err(ConfigExprError::ValidationError(
+            //     "Rules cannot be empty".to_string(),
+            // ));
         }
 
         for (index, rule) in rules.rules.iter().enumerate() {
