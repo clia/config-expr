@@ -97,6 +97,7 @@ pub struct ConfigRules {
 }
 
 /// 配置表达式评估器
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfigEvaluator {
     rules: ConfigRules,
 }
