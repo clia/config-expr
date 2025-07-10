@@ -19,7 +19,7 @@ pub enum ConfigExprError {
 }
 
 /// 操作符枚举
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Operator {
     Equals,
@@ -56,7 +56,7 @@ impl Operator {
 }
 
 /// 条件表达式
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum Condition {
     /// 简单条件：字段比较
@@ -72,7 +72,7 @@ pub enum Condition {
 }
 
 /// 规则的返回值，支持字符串或JSON对象
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum RuleResult {
     String(String),
@@ -80,7 +80,7 @@ pub enum RuleResult {
 }
 
 /// 单个规则定义
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Rule {
     #[serde(rename = "if")]
     pub condition: Condition,
@@ -89,7 +89,7 @@ pub struct Rule {
 }
 
 /// 配置规则集
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ConfigRules {
     pub rules: Vec<Rule>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -97,7 +97,7 @@ pub struct ConfigRules {
 }
 
 /// 配置表达式评估器
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ConfigEvaluator {
     rules: ConfigRules,
 }
