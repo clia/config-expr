@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use thiserror::Error;
 
-/// 配置表达式错误类型
+/// Configuration expression error types
 #[derive(Error, Debug)]
 pub enum ConfigExprError {
     #[error("Invalid operator: {0}")]
@@ -18,7 +18,7 @@ pub enum ConfigExprError {
     ValidationError(String),
 }
 
-/// 操作符枚举
+/// Operator enumeration
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Operator {
@@ -38,7 +38,7 @@ pub enum Operator {
 }
 
 impl Operator {
-    /// 验证操作符是否有效
+    /// Validate if the operator is valid
     pub fn is_valid(&self) -> bool {
         matches!(
             self,
@@ -55,23 +55,23 @@ impl Operator {
     }
 }
 
-/// 条件表达式
+/// Condition expression
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum Condition {
-    /// 简单条件：字段比较
+    /// Simple condition: field comparison
     Simple {
         field: String,
         op: Operator,
         value: String,
     },
-    /// AND 条件：所有子条件都必须满足
+    /// AND condition: all sub-conditions must be satisfied
     And { and: Vec<Condition> },
-    /// OR 条件：至少一个子条件满足
+    /// OR condition: at least one sub-condition must be satisfied
     Or { or: Vec<Condition> },
 }
 
-/// 规则的返回值，支持字符串或JSON对象
+/// Rule return value, supports string or JSON object
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum RuleResult {
@@ -79,7 +79,7 @@ pub enum RuleResult {
     Object(serde_json::Value),
 }
 
-/// 单个规则定义
+/// Single rule definition
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Rule {
     #[serde(rename = "if")]
@@ -88,7 +88,7 @@ pub struct Rule {
     pub result: RuleResult,
 }
 
-/// 配置规则集
+/// Configuration rule set
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ConfigRules {
     pub rules: Vec<Rule>,
@@ -96,27 +96,27 @@ pub struct ConfigRules {
     pub fallback: Option<RuleResult>,
 }
 
-/// 配置表达式评估器
+/// Configuration expression evaluator
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ConfigEvaluator {
     rules: ConfigRules,
 }
 
 impl ConfigEvaluator {
-    /// 创建新的评估器
+    /// Create a new evaluator
     pub fn new(rules: ConfigRules) -> Result<Self, ConfigExprError> {
-        // 验证规则集
+        // Validate rule set
         Self::validate_rules(&rules)?;
         Ok(Self { rules })
     }
 
-    /// 从JSON字符串创建评估器
+    /// Create evaluator from JSON string
     pub fn from_json(json: &str) -> Result<Self, ConfigExprError> {
         let rules: ConfigRules = serde_json::from_str(json)?;
         Self::new(rules)
     }
 
-    /// 评估请求参数，返回匹配的结果
+    /// Evaluate request parameters and return matching result
     pub fn evaluate(&self, params: &HashMap<String, String>) -> Option<RuleResult> {
         for rule in &self.rules.rules {
             if self.evaluate_condition(&rule.condition, params) {
@@ -126,7 +126,7 @@ impl ConfigEvaluator {
         self.rules.fallback.clone()
     }
 
-    /// 评估单个条件
+    /// Evaluate a single condition
     fn evaluate_condition(&self, condition: &Condition, params: &HashMap<String, String>) -> bool {
         match condition {
             Condition::Simple { field, op, value } => {
@@ -137,7 +137,7 @@ impl ConfigEvaluator {
         }
     }
 
-    /// 评估简单条件
+    /// Evaluate simple condition
     fn evaluate_simple_condition(
         &self,
         field: &str,
@@ -158,7 +158,7 @@ impl ConfigEvaluator {
             Operator::Regex => {
                 match Regex::new(value) {
                     Ok(regex) => regex.is_match(field_value),
-                    Err(_) => false, // 正则表达式无效时返回false
+                    Err(_) => false, // Return false if regex is invalid
                 }
             }
             Operator::GreaterThan => self.compare_numbers(field_value, value, |a, b| a > b),
@@ -168,24 +168,23 @@ impl ConfigEvaluator {
         }
     }
 
-    /// 比较两个字符串作为数字
+    /// Compare two strings as numbers
     fn compare_numbers<F>(&self, field_value: &str, target_value: &str, compare_fn: F) -> bool
     where
         F: Fn(f64, f64) -> bool,
     {
         match (field_value.parse::<f64>(), target_value.parse::<f64>()) {
             (Ok(field_num), Ok(target_num)) => compare_fn(field_num, target_num),
-            _ => false, // 如果任一值无法解析为数字，返回false
+            _ => false, // Return false if any value cannot be parsed as a number
         }
     }
 
-    /// 验证规则集是否合法
+    /// Validate if the rule set is valid
     fn validate_rules(rules: &ConfigRules) -> Result<(), ConfigExprError> {
         if rules.rules.is_empty() {
-            return Ok(());
-            // return Err(ConfigExprError::ValidationError(
-            //     "Rules cannot be empty".to_string(),
-            // ));
+            return Err(ConfigExprError::ValidationError(
+                "Rules cannot be empty".to_string(),
+            ));
         }
 
         for (index, rule) in rules.rules.iter().enumerate() {
@@ -195,7 +194,7 @@ impl ConfigEvaluator {
         Ok(())
     }
 
-    /// 验证条件是否合法
+    /// Validate if the condition is valid
     fn validate_condition(condition: &Condition, rule_index: usize) -> Result<(), ConfigExprError> {
         match condition {
             Condition::Simple { field, op, value } => {
@@ -247,7 +246,7 @@ impl ConfigEvaluator {
     }
 }
 
-/// 便利方法：直接从JSON字符串评估
+/// Convenience method: directly evaluate from JSON string
 pub fn evaluate_json(
     json: &str,
     params: &HashMap<String, String>,
@@ -256,7 +255,7 @@ pub fn evaluate_json(
     Ok(evaluator.evaluate(params))
 }
 
-/// 便利方法：验证JSON规则是否合法
+/// Convenience method: validate if JSON rules are valid
 pub fn validate_json(json: &str) -> Result<(), ConfigExprError> {
     let rules: ConfigRules = serde_json::from_str(json)?;
     ConfigEvaluator::validate_rules(&rules)

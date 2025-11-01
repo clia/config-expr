@@ -1,54 +1,56 @@
 # Config Expression
 
-一个灵活的配置表达式评估器，支持JSON schema定义的规则系统。
+[中文版](README_zh.md)
 
-## 特性
+A flexible configuration expression evaluator that supports rule systems defined by JSON schema.
 
-- 🚀 **高性能**: 基于Rust实现，零拷贝解析
-- 📝 **JSON Schema**: 结构清晰、语义明确的JSON规则定义
-- 🔧 **可扩展**: 支持多种操作符和复合条件
-- 🎯 **类型安全**: 完整的Rust类型系统支持
-- ✅ **验证器**: 内置规则合法性验证
-- 🌐 **前后端友好**: 易于前端配置和后端执行
+## Features
 
-## 支持的操作符
+- 🚀 **High Performance**: Implemented in Rust with zero-copy parsing
+- 📝 **JSON Schema**: Clear and semantically explicit JSON rule definitions
+- 🔧 **Extensible**: Supports multiple operators and compound conditions
+- 🎯 **Type Safe**: Full Rust type system support
+- ✅ **Validator**: Built-in rule validity validation
+- 🌐 **Frontend/Backend Friendly**: Easy to configure on frontend and execute on backend
 
-| 操作符 | 说明 | 示例 | 备注 |
-|--------|------|------|------|
-| `equals` | 完全等于 | `"platform" equals "RTD"` | 字符串比较 |
-| `contains` | 包含 | `"platform" contains "RTD"` | 字符串比较 |
-| `prefix` | 前缀匹配 | `"platform" prefix "Hi"` | 字符串比较 |
-| `suffix` | 后缀匹配 | `"platform" suffix "Pro"` | 字符串比较 |
-| `regex` | 正则匹配 | `"version" regex "^v\\d+\\.\\d+\\.\\d+$"` | 字符串比较 |
-| `gt` | 大于 | `"score" gt "80"` | 数值比较 |
-| `lt` | 小于 | `"age" lt "18"` | 数值比较 |
-| `ge` | 大于等于 | `"level" ge "5"` | 数值比较 |
-| `le` | 小于等于 | `"temperature" le "25.5"` | 数值比较 |
+## Supported Operators
 
-## 支持的条件类型
+| Operator | Description | Example | Note |
+|----------|-------------|---------|------|
+| `equals` | Exact equals | `"platform" equals "RTD"` | String comparison |
+| `contains` | Contains | `"platform" contains "RTD"` | String comparison |
+| `prefix` | Prefix match | `"platform" prefix "Hi"` | String comparison |
+| `suffix` | Suffix match | `"platform" suffix "Pro"` | String comparison |
+| `regex` | Regex match | `"version" regex "^v\\d+\\.\\d+\\.\\d+$"` | String comparison |
+| `gt` | Greater than | `"score" gt "80"` | Numeric comparison |
+| `lt` | Less than | `"age" lt "18"` | Numeric comparison |
+| `ge` | Greater than or equal | `"level" ge "5"` | Numeric comparison |
+| `le` | Less than or equal | `"temperature" le "25.5"` | Numeric comparison |
 
-- **简单条件**: 单个字段比较
-- **AND条件**: 所有子条件都必须满足
-- **OR条件**: 至少一个子条件满足
-- **嵌套条件**: 支持任意层级的条件嵌套
+## Supported Condition Types
 
-## 快速开始
+- **Simple Condition**: Single field comparison
+- **AND Condition**: All sub-conditions must be satisfied
+- **OR Condition**: At least one sub-condition must be satisfied
+- **Nested Conditions**: Supports arbitrary levels of condition nesting
 
-### 添加依赖
+## Getting Started
+
+### Add Dependency
 
 ```toml
 [dependencies]
 clia-config-expr = "0.1.1"
 ```
 
-### 基本用法
+### Basic Usage
 
 ```rust
 use clia_config_expr::{evaluate_json, validate_json};
 use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // 定义规则
+    // Define rules
     let rules = r#"
     {
         "rules": [
@@ -82,43 +84,43 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     "#;
 
-    // 验证规则
+    // Validate rules
     validate_json(rules)?;
 
-    // 准备参数
+    // Prepare parameters
     let mut params = HashMap::new();
     params.insert("platform".to_string(), "RTD-2000".to_string());
     params.insert("region".to_string(), "CN".to_string());
 
-    // 评估规则
+    // Evaluate rules
     let result = evaluate_json(rules, &params)?;
-    println!("结果: {:?}", result); // Some(String("chip_rtd_cn"))
+    println!("Result: {:?}", result); // Some(String("chip_rtd_cn"))
 
     Ok(())
 }
 ```
 
-## JSON Schema 结构
+## JSON Schema Structure
 
-### 基本结构
+### Basic Structure
 
 ```json
 {
     "rules": [
         {
-            "if": "<条件表达式>",
-            "then": "<返回值>"
+            "if": "<condition expression>",
+            "then": "<return value>"
         }
     ],
-    "fallback": "<可选的默认返回值>"
+    "fallback": "<optional default return value>"
 }
 ```
 
-### 条件表达式
+### Condition Expressions
 
-#### 简单条件
+#### Simple Condition
 
-字符串比较：
+String comparison:
 ```json
 {
     "field": "platform",
@@ -127,7 +129,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-数值比较：
+Numeric comparison:
 ```json
 {
     "field": "score",
@@ -136,7 +138,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-#### AND条件
+#### AND Condition
 ```json
 {
     "and": [
@@ -146,7 +148,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-#### OR条件
+#### OR Condition
 ```json
 {
     "or": [
@@ -156,9 +158,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### 返回值类型
+### Return Value Types
 
-#### 字符串返回值
+#### String Return Value
 ```json
 {
     "if": { "field": "platform", "op": "equals", "value": "RTD" },
@@ -166,7 +168,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-#### JSON对象返回值
+#### JSON Object Return Value
 ```json
 {
     "if": { "field": "platform", "op": "equals", "value": "RTD" },
@@ -180,37 +182,38 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-## API 文档
+## API Documentation
 
-### 主要类型
+### Main Types
 
-- `ConfigEvaluator`: 配置表达式评估器
-- `ConfigRules`: 规则集定义
-- `Condition`: 条件表达式
-- `RuleResult`: 规则结果（字符串或JSON对象）
-- `Operator`: 操作符枚举
+- `ConfigEvaluator`: Configuration expression evaluator
+- `ConfigRules`: Rule set definition
+- `Condition`: Condition expression
+- `RuleResult`: Rule result (string or JSON object)
+- `Operator`: Operator enumeration
 
-### 主要方法
+### Main Methods
 
-- `evaluate_json(json, params)`: 直接从JSON字符串评估
-- `validate_json(json)`: 验证JSON规则是否合法
-- `ConfigEvaluator::from_json(json)`: 从JSON创建评估器
-- `evaluator.evaluate(params)`: 评估参数并返回结果
+- `evaluate_json(json, params)`: Directly evaluate from JSON string
+- `validate_json(json)`: Validate if JSON rules are valid
+- `ConfigEvaluator::from_json(json)`: Create evaluator from JSON
+- `evaluator.evaluate(params)`: Evaluate parameters and return result
 
-## 运行示例
+## Run Examples
 
 ```bash
 cargo run --example basic_usage
 ```
 
-## 运行测试
+## Run Tests
 
 ```bash
 cargo test
 ```
 
-## 许可证
+## License
 
-本项目采用 MIT 或 Apache-2.0 双重许可证。
+This project is dual-licensed under MIT or Apache-2.0.
+
 ```
 A JSON-based configuration expression processor.
