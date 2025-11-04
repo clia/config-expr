@@ -181,11 +181,11 @@ impl ConfigEvaluator {
 
     /// Validate if the rule set is valid
     fn validate_rules(rules: &ConfigRules) -> Result<(), ConfigExprError> {
-        if rules.rules.is_empty() {
-            return Err(ConfigExprError::ValidationError(
-                "Rules cannot be empty".to_string(),
-            ));
-        }
+        // if rules.rules.is_empty() {
+        //     return Err(ConfigExprError::ValidationError(
+        //         "Rules cannot be empty".to_string(),
+        //     ));
+        // }
 
         for (index, rule) in rules.rules.iter().enumerate() {
             Self::validate_condition(&rule.condition, index)?;
@@ -540,21 +540,21 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_validation_empty_rules() {
-        let json = r#"
-        {
-            "rules": []
-        }
-        "#;
+    // #[test]
+    // fn test_validation_empty_rules() {
+    //     let json = r#"
+    //     {
+    //         "rules": []
+    //     }
+    //     "#;
 
-        let result = validate_json(json);
-        assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("Rules cannot be empty"));
-    }
+    //     let result = validate_json(json);
+    //     assert!(result.is_err());
+    //     assert!(result
+    //         .unwrap_err()
+    //         .to_string()
+    //         .contains("Rules cannot be empty"));
+    // }
 
     #[test]
     fn test_validation_empty_field() {

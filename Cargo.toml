@@ -1,6 +1,6 @@
 [package]
 name = "clia-config-expr"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "A flexible configuration expression evaluator with JSON schema support"
 license = "MIT OR Apache-2.0"
